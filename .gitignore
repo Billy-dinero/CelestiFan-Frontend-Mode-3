@@ -1,0 +1,11 @@
+.env
+venv
+__pycache__/
+App.jsx
+ArtistRanking.jsx
+ExclusiveContent.jsx
+FanLeaderboard.jsx
+FooterCTA.jsx
+HeroSection.jsx
+README.md
+WhyCelestiFan.jsx
