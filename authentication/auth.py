@@ -70,9 +70,13 @@ def log():
              return jsonify({'message': 'User not found'}), 400
         
         
-        response = jsonify({'msg': 'logged in successfully'})
+     
         #create an access token for the user to verify their identity when visiting a protected route
         access_token = create_access_token(identity=email)
+        
+        response = jsonify({
+             'msg': 'logged in successfully',
+               'access_token':access_token})
+        #this add a set cookie header so when the user gets the response the token is automatically stored in the browser's cookie storage
         set_access_cookies(response, access_token)
         return response
-     
