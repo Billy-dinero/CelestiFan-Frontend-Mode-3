@@ -60,17 +60,21 @@ def log():
              Missing_fields.append('email')
         if not password:
              Missing_fields.append('password')
-        if Missing_fields:
              jsonify({"Error": f"Missing_fields: {Missing_fields}"}), 400
         
-        #find a user by email 
+        #checks if email is in db 
         existing_user = User.query.filter_by(email=email).first()
-
         if not existing_user:
-             return jsonify({'message': 'User not found'}), 400
+             return jsonify({'message': 'Invalid email'}), 401
+        
+        #hashes the entered password and comapare it to the hash password in the db
+        if check_password_hash(existing_user.password, password):
+            pass
+        else:
+            return jsonify({'message': 'Invalid password'}), 401
+
         
         
-     
         #create an access token for the user to verify their identity when visiting a protected route
         access_token = create_access_token(identity=email)
         
