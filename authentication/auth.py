@@ -31,7 +31,7 @@ def sign():
            return jsonify({"Error": f"Missing_fields: {Missing_fields}"}), 400
         
         
-        #Check if email already exists
+        #find's email and compare them if it already exist
     existing_user = User.query.filter_by(email=email).first()
     if existing_user:
         return jsonify({"message": "Email already exists"}), 400
@@ -62,7 +62,7 @@ def log():
              Missing_fields.append('password')
              jsonify({"Error": f"Missing_fields: {Missing_fields}"}), 400
         
-        #checks if email is in db 
+        #finds user by email
         existing_user = User.query.filter_by(email=email).first()
         if not existing_user:
              return jsonify({'message': 'Invalid email'}), 401
@@ -72,7 +72,6 @@ def log():
             pass
         else:
             return jsonify({'message': 'Invalid password'}), 401
-
         
         
         #create an access token for the user to verify their identity when visiting a protected route
