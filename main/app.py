@@ -21,7 +21,6 @@ app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'your-default-secret'
 #setting up MySQL connection
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
 # Initializing extensions
 db.init_app(app)
 jwt = JWTManager(app)

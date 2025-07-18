@@ -3,9 +3,29 @@ from flask_jwt_extended import create_access_token
 from flask_jwt_extended  import set_access_cookies
 from werkzeug.security import generate_password_hash, check_password_hash
 from main.models import db, User
-
+from flask_jwt_extended import get_jwt_identity, get_jwt
+from datetime import timedelta, timezone, datetime
 
 authentication = Blueprint('authentication', __name__)
+
+
+# Define how early before expiration you want to refresh the token
+REFRESH_WINDOW_MINUTES = 60
+#Refreshing token  
+@authentication.after_request
+def refresh_expiring_jwts(response):
+    try:
+        exp_timestamp = get_jwt()["exp"]
+        now = datetime.now(timezone.utc)
+        target_timestamp = datetime.timestamp(now + timedelta(minutes=REFRESH_WINDOW_MINUTES))
+        if target_timestamp > exp_timestamp:
+            access_token = create_access_token(identity=get_jwt_identity())
+            set_access_cookies(response, access_token)
+        return response
+    except (RuntimeError, KeyError):
+      #return response if jwt is invalid
+        return response
+
 
 @authentication.route('/signup', methods=['POST'])
 def sign():
