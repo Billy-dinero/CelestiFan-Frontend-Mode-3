@@ -1,13 +1,14 @@
-from flask import Flask, request, jsonify, Blueprint
+from flask import Flask, request, jsonify, Blueprint, current_app
 from flask_jwt_extended import create_access_token
 from flask_jwt_extended  import set_access_cookies, verify_jwt_in_request
 from werkzeug.security import generate_password_hash, check_password_hash
-from main.models import db, User
+from extensions import db
+from main.models import User
 from flask_jwt_extended import get_jwt_identity, get_jwt
 from datetime import timedelta, timezone, datetime
 
 authentication = Blueprint('authentication', __name__)
-
+      
 
 # Define how early before expiration you want to refresh the token
 REFRESH_WINDOW_MINUTES = 60
@@ -60,12 +61,10 @@ def sign():
     if not password:
         Missing_fields.append('password')
 
-
     if Missing_fields:   
            return jsonify({"Error": f"Missing_fields: {Missing_fields}"}), 400
         
-        
-        #find's email and compare them if it already exist
+    #find's email and compare them if it already exist
     existing_user = User.query.filter_by(email=email).first()
     if existing_user:
         return jsonify({"message": "Email already exists"}), 400
@@ -88,13 +87,14 @@ def log():
         email = data.get('email')
         password = data.get('password')
 
-        #FIX THIS MISSING FIELDS 
+        #check if email and password are provided
         Missing_fields = []
         if not email:
-             Missing_fields.append('email')
+            Missing_fields.append('email')
         if not password:
-             Missing_fields.append('password')
-             jsonify({"Error": f"Missing_fields: {Missing_fields}"}), 400
+            Missing_fields.append('password')
+        if Missing_fields:    
+            return jsonify({"Error": f"Missing_fields: {Missing_fields}"}), 400
         
         #finds user by email
         existing_user = User.query.filter_by(email=email).first()
