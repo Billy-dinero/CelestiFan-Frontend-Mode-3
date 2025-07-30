@@ -4,7 +4,7 @@ from flask_jwt_extended  import set_access_cookies, verify_jwt_in_request
 from werkzeug.security import generate_password_hash, check_password_hash
 from extensions import db
 from main.models import User
-from flask_jwt_extended import get_jwt_identity, get_jwt
+from flask_jwt_extended import get_jwt_identity, get_jwt, jwt_required
 from datetime import timedelta, timezone, datetime
 
 authentication = Blueprint('authentication', __name__)
@@ -117,3 +117,49 @@ def log():
         #this add a set cookie header so when the user gets the response the token is automatically stored in the browser's cookie storage
         set_access_cookies(response, access_token)
         return response
+
+@authentication.route('/update', methods=['PUT'])
+@jwt_required()
+def update():
+
+    current_email = get_jwt_identity()
+    get_email = User.query.filter_by(email=current_email).first()
+
+    if not get_email:
+        return jsonify({"message": "user could not be found"}), 401
+    
+    data = request.get_json()
+    new_email = data.get("new_email")
+
+    if not new_email:
+        return jsonify({"message": "new email required"}), 400
+    
+    get_email.email = new_email
+    db.session.commit()
+    return jsonify({"message": "email updated successfully"}), 201
+
+@authentication.route('/password_update', methods=['PUT'])
+@jwt_required()
+def password_update():
+
+    current_email = get_jwt_identity()
+    get_password = User.query.filter_by(email=current_email).first()
+
+    if not get_password:
+        return jsonify({"message": "user could not be found"}), 401
+    
+    data = request.get_json()
+    
+    old_password = data.get("old_password")
+    new_password = data.get("new_password")
+
+
+    if not old_password or not new_password:
+        return jsonify({"message": "Both old and new password must be provided"}), 400
+    
+    if not check_password_hash(get_password.password, old_password):
+        return jsonify({"message": "old password is incorrect"}), 400
+    
+    get_password.password = generate_password_hash(new_password)
+    db.session.commit()
+    return jsonify({"message": "password updated successfully"}), 201
